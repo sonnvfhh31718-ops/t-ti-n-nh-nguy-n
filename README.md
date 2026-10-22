@@ -9,6 +9,45 @@ Website gia phả tiếng Việt với giao diện xanh rêu/vàng đồng, cây
 - `supabase/schema.sql`: bảng, Row Level Security (RLS), chính sách ảnh riêng tư.
 - Cần tự tạo dự án Supabase và bật GitHub Pages hoặc host tĩnh. Mã nguồn đã được cập nhật, nhưng website trực tuyến chưa hoạt động cho đến khi hoàn thành cấu hình.
 
+
+## Supabase đã kết nối
+
+Dự án Supabase đã tạo và kết nối vào `config.js`:
+- Project: `gia-pha-to-tien`
+- Project URL: `https://cdvkcjxltwttfxyjzrck.supabase.co`
+- Database tables: `profiles`, `family_members`
+- Storage bucket: `ancestor-portraits` (private, ảnh tối đa 5 MB)
+- RLS được bật để chỉ người đăng nhập đọc dữ liệu; chỉ role `admin` mới được thay đổi hồ sơ và tải ảnh.
+
+### Tạo tài khoản quản trị đầu tiên
+
+Vì mật khẩu là thông tin riêng tư, hãy tự tạo tài khoản trong Supabase Dashboard:
+1. Mở [Authentication → Users](https://supabase.com/dashboard/project/cdvkcjxltwttfxyjzrck/auth/users).
+2. Chọn **Add user** / **Create new user**, nhập email của bạn và đặt mật khẩu mạnh. Không gửi mật khẩu cho người khác.
+3. Mở [SQL Editor](https://supabase.com/dashboard/project/cdvkcjxltwttfxyjzrck/sql/new), chạy truy vấn dưới đây sau khi thay `EMAIL_CUA_BAN` bằng email vừa tạo (giữ dấu nháy đơn):
+   ```sql
+   insert into public.profiles (user_id, role, display_name)
+   select id, 'admin', 'Quản trị gia phả'
+   from auth.users
+   where lower(email) = lower('EMAIL_CUA_BAN')
+   on conflict (user_id) do update set role = 'admin';
+   ```
+4. Trong [Authentication → URL Configuration](https://supabase.com/dashboard/project/cdvkcjxltwttfxyjzrck/auth/url-configuration), đặt **Site URL** là `https://sonnvfhh31718-ops.github.io/t-ti-n-nh-nguy-n/` và thêm đúng URL đó vào **Redirect URLs**.
+5. Mở [website Gia Phả Tổ Tiên](https://sonnvfhh31718-ops.github.io/t-ti-n-nh-nguy-n/), đăng nhập bằng email và mật khẩu đã tạo. Hãy thử thêm một thành viên và tải ảnh để kiểm tra.
+
+### Thêm tài khoản thành viên
+
+Tạo người dùng tại Authentication → Users, rồi thêm hồ sơ quyền thành viên trong SQL Editor:
+```sql
+insert into public.profiles (user_id, role, display_name)
+select id, 'member', 'Tên thành viên'
+from auth.users
+where lower(email) = lower('EMAIL_THANH_VIEN')
+on conflict (user_id) do update set role = 'member';
+```
+Không bật đăng ký công khai nếu chỉ muốn quản trị viên tạo tài khoản. Chỉ dùng publishable/anon key trong `config.js`; tuyệt đối không đưa service_role/secret key vào GitHub hoặc trình duyệt.
+
+
 ## 1. Tạo cơ sở dữ liệu và đăng nhập
 
 1. Mở https://supabase.com/dashboard và tạo một project mới.
