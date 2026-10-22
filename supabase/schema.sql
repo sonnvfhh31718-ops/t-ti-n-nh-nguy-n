@@ -19,7 +19,8 @@ create table if not exists public.family_members (
   parent_id uuid references public.family_members(id) on delete set null,
   hometown text,
   bio text,
-  photo_url text,
+  photo_url text, -- legacy/optional URL field
+  photo_path text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -88,3 +89,6 @@ using (bucket_id = 'ancestor-portraits' and exists (select 1 from public.profile
 -- on conflict (user_id) do update set role = 'admin';
 
 -- IMPORTANT: keep family data private. This schema requires login to read family data.
+
+-- Safe to run on an existing project too:
+alter table public.family_members add column if not exists photo_path text;
