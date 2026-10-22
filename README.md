@@ -107,3 +107,21 @@ Chỉ người có role `admin` mới được thêm/sửa/xóa thành viên ho�
 - **Đăng nhập được nhưng không thấy nút quản trị**: chạy câu SQL gán role `admin` và đăng nhập lại.
 - **Lỗi quyền truy cập/RLS**: kiểm tra đã chạy toàn bộ `schema.sql` và user có bản ghi trong `profiles`.
 - **Ảnh không tải được**: kiểm tra bucket `ancestor-portraits` và các policy trong schema.
+
+
+### Trang đăng nhập và đăng ký riêng
+
+- Đăng nhập: `https://sonnvfhh31718-ops.github.io/t-ti-n-nh-nguy-n/login.html`
+- Đăng ký: `https://sonnvfhh31718-ops.github.io/t-ti-n-nh-nguy-n/register.html`
+- Khi đăng ký, Supabase Auth lưu tài khoản và trigger tự tạo dòng trong `public.profiles` với quyền mặc định `member`. Nếu dự án bật xác nhận email, người dùng phải bấm liên kết xác nhận trong email trước khi đăng nhập.
+- Để cấp quyền quản trị cho tài khoản đã đăng ký, mở SQL Editor của đúng dự án `cdvkcjxltwttfxyjzrck` và chạy (thay email mẫu):
+  ```sql
+  update public.profiles
+  set role = 'admin'
+  where user_id = (
+    select id from auth.users
+    where lower(email) = lower('EMAIL_CUA_BAN')
+  );
+  ```
+- Chỉ dùng publishable/anon key trong `config.js`; tuyệt đối không đưa service_role/secret key vào GitHub hoặc trình duyệt.
+
