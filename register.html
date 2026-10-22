@@ -9,10 +9,45 @@
 <div id="message" class="status" hidden></div>
 <form id="registerForm"><div class="field"><label for="name">Họ và tên</label><input id="name" type="text" autocomplete="name" maxlength="80" placeholder="Tên của bạn" required></div><div class="field"><label for="email">Địa chỉ email</label><input id="email" type="email" autocomplete="email" placeholder="email@example.com" required></div><div class="field"><label for="password">Tạo mật khẩu</label><input id="password" type="password" autocomplete="new-password" minlength="8" placeholder="Ít nhất 8 ký tự" required><div class="hint">Dùng mật khẩu riêng, khó đoán và không chia sẻ cho người khác.</div></div><div class="field"><label for="confirm">Nhập lại mật khẩu</label><input id="confirm" type="password" autocomplete="new-password" minlength="8" placeholder="Nhập lại mật khẩu" required></div><button class="btn" id="submitBtn" type="submit">Đăng ký tài khoản</button></form>
 <div class="links">Đã có tài khoản? <a href="./login.html">Đăng nhập</a></div><div class="links"><a href="./index.html">← Về trang gia phả</a></div><div class="foot">Mật khẩu được Supabase Auth xử lý; website không lưu mật khẩu dạng văn bản.</div></main>
+<form id="verifyForm" hidden><div class="field"><label for="otp">Mã xác nhận 6 số trong email</label><input id="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="Nhập mã 6 số" required></div><button class="btn" id="verifyBtn" type="submit">Xác nhận email</button><button class="btn" id="resendBtn" type="button" style="background:#a8794f">Gửi lại mã xác nhận</button></form>
 <script src="./config.js"></script><script type="module">
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2';
 const cfg=window.GIA_PHA_CONFIG||{};const sb=cfg.url&&cfg.anonKey?createClient(cfg.url,cfg.anonKey):null;
 const msg=document.getElementById('message'),btn=document.getElementById('submitBtn');
+const registerForm=document.getElementById('registerForm'),verifyForm=document.getElementById('verifyForm');
+let pendingEmail='';
 function show(text,error=false){msg.textContent=text;msg.hidden=false;msg.classList.toggle('error',error)}
-document.getElementById('registerForm').addEventListener('submit',async e=>{e.preventDefault();const name=document.getElementById('name').value.trim(),email=document.getElementById('email').value.trim(),password=document.getElementById('password').value,confirm=document.getElementById('confirm').value;if(password!==confirm){show('Hai mật khẩu không khớp.',true);return}if(password.length<8){show('Mật khẩu cần ít nhất 8 ký tự.',true);return}if(!sb){show('Chưa cấu hình kết nối Supabase.',true);return}btn.disabled=true;btn.textContent='Đang tạo tài khoản…';const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:name},emailRedirectTo:new URL('./index.html',location.href).href}});btn.disabled=false;btn.textContent='Đăng ký tài khoản';if(error){show('Không thể đăng ký lúc này. Hãy kiểm tra email và thử lại.',true);return}if(data.session){show('Đăng ký thành công! Đang chuyển đến trang gia phả…');setTimeout(()=>location.href='./index.html',1000)}else{show('Đã gửi yêu cầu đăng ký. Hãy kiểm tra email để xác nhận tài khoản, sau đó đăng nhập tại trang Đăng nhập.')}});
+registerForm.addEventListener('submit',async e=>{
+ e.preventDefault();
+ const name=document.getElementById('name').value.trim(),email=document.getElementById('email').value.trim(),password=document.getElementById('password').value,confirm=document.getElementById('confirm').value;
+ if(password!==confirm){show('Hai mật khẩu không khớp.',true);return}
+ if(password.length<8){show('Mật khẩu cần ít nhất 8 ký tự.',true);return}
+ if(!sb){show('Chưa cấu hình kết nối Supabase.',true);return}
+ btn.disabled=true;btn.textContent='Đang tạo tài khoản…';
+ const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:name}}});
+ btn.disabled=false;btn.textContent='Đăng ký tài khoản';
+ if(error){show(error.message||'Không thể đăng ký. Hãy kiểm tra email và thử lại.',true);return}
+ pendingEmail=email;
+ registerForm.hidden=true;verifyForm.hidden=false;
+ show('Đã gửi mã xác nhận đến '+email+'. Hãy nhập mã 6 số trong email để kích hoạt tài khoản.');
+});
+verifyForm.addEventListener('submit',async e=>{
+ e.preventDefault();if(!sb||!pendingEmail){show('Hãy đăng ký email trước khi xác nhận.',true);return}
+ const verifyBtn=document.getElementById('verifyBtn'),token=document.getElementById('otp').value.trim();
+ if(!/^\d{6}$/.test(token)){show('Mã xác nhận phải gồm 6 chữ số.',true);return}
+ verifyBtn.disabled=true;verifyBtn.textContent='Đang xác nhận…';
+ const {error}=await sb.auth.verifyOtp({email:pendingEmail,token,type:'signup'});
+ verifyBtn.disabled=false;verifyBtn.textContent='Xác nhận email';
+ if(error){show('Mã không đúng hoặc đã hết hạn. Hãy kiểm tra email và thử lại.',true);return}
+ show('Xác nhận email thành công! Đang chuyển đến trang gia phả…');
+ setTimeout(()=>location.href='./index.html',1000);
+});
+document.getElementById('resendBtn').addEventListener('click',async()=>{
+ if(!sb||!pendingEmail)return;
+ const resend=document.getElementById('resendBtn');resend.disabled=true;resend.textContent='Đang gửi lại…';
+ const {error}=await sb.auth.resend({type:'signup',email:pendingEmail});
+ resend.disabled=false;resend.textContent='Gửi lại mã xác nhận';
+ if(error)show('Chưa gửi lại được mã. Vui lòng đợi một chút rồi thử lại.',true);
+ else show('Đã yêu cầu gửi lại mã xác nhận đến '+pendingEmail+'.');
+});
 </script></body></html>
