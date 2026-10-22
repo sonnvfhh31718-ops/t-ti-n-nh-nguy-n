@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#741d2a">
-<title>Gia Phả Tổ Tiên — Lưu giữ cội nguồn</title>
+<meta name="theme-color" content="#173b5e">
+<title>Cây Gia Phả Tổ Tiên — Thêm ảnh, sửa tên thành viên</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--forest:#173b5e;--forest2:#285d83;--gold:#a8794f;--goldlight:#d8b58a;--cream:#f5f1eb;--paper:#fffdf9;--ink:#26384a;--muted:#718091;--line:#d9d0c4;--red:#a94442}
@@ -101,18 +101,36 @@ body{background:linear-gradient(180deg,#f5f1eb 0%,#f8f7f3 46%,#f2eee7 100%)}
 }
 
 @media(max-width:760px){.navlinks{display:none}.hero{padding-bottom:48px}.hero-content{grid-template-columns:1fr;margin-top:38px}.hero-art{display:none}.stats{gap:8px}.stat{padding:13px}.stat strong{font-size:22px}.stat span{font-size:10px}.section-head{align-items:flex-start;flex-direction:column}.people-grid{grid-template-columns:1fr}.history{grid-template-columns:1fr}.panel{padding:13px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.hero h1{font-size:43px}.user-label{display:none}}
+
+/* Clearer editable family-tree workspace */
+.navright{flex-wrap:wrap}.navright a{text-decoration:none}
+.navright .btn{white-space:nowrap}
+#familyTree .section-head p{max-width:700px;line-height:1.7}
+#tree .generation{align-items:stretch}
+#tree .person{width:190px;min-height:170px;padding:15px 12px 13px;background:linear-gradient(180deg,#fffdf9,#f4ede3);border:1px solid #d8c4ae;border-radius:16px}
+#tree .person .portrait{width:68px;height:68px;border:2px solid #d8b58a;background:#e8ded2;color:#173b5e;box-shadow:0 0 0 4px #a8794f12}
+#tree .person h3{font-size:14px;line-height:1.45;margin-bottom:3px}
+#tree .person small{display:block;margin-top:4px}
+#tree .person-tools{flex-wrap:wrap}
+#tree .person-tools .mini{padding:6px 10px;border-radius:8px}
+#tree .generation+.generation:before{left:8%;right:8%;border-top:1px dashed #b89b7e}
+#tree .person:before{border-left:1px dashed #b89b7e}
+#tree .person:hover{transform:translateY(-3px);box-shadow:0 12px 28px #173b5e16}
+#tree .person{transition:transform .18s ease,box-shadow .18s ease}
+@media(max-width:760px){.navlinks{display:none}.navright{gap:6px}.navright .btn{padding:8px 10px;font-size:11px}#tree .generation{gap:10px}#tree .person{width:155px;min-height:165px}}
+
 </style>
 </head>
 <body>
 <header class="hero" id="top">
-<nav class="nav"><div class="brand"><div class="seal">祖</div><span>GIA PHẢ TỔ TIÊN</span></div><div class="navlinks"><a href="#familyTree">Cây gia phả</a><a href="#members">Thành viên</a><a href="#heritage">Truyền thống</a></div><div class="navright"><span id="userLabel" class="user-label"></span><button id="authToggle" class="btn outline">Đăng nhập quản trị</button></div></nav>
+<nav class="nav"><div class="brand"><div class="seal">祖</div><span>GIA PHẢ TỔ TIÊN</span></div><div class="navlinks"><a href="#familyTree">Cây gia phả</a><a href="#members">Thành viên</a><a href="#heritage">Truyền thống</a></div><div class="navright"><a class="btn outline" href="./login.html">Đăng nhập</a><a class="btn gold" href="./register.html">Đăng ký</a><span id="userLabel" class="user-label"></span><button id="authToggle" class="btn outline">Tài khoản</button></div></nav>
 <div class="hero-content"><div><div class="eyebrow">Uống nước nhớ nguồn · Ăn quả nhớ người trồng cây</div><h1>Lưu giữ cội nguồn,<br>nối dài thế hệ.</h1><p>Nơi gìn giữ tên tuổi, hình ảnh và câu chuyện của ông bà tổ tiên — để các thế hệ trong gia đình luôn nhớ về cội nguồn.</p><button class="btn gold" id="goTree">Khám phá cây gia phả　↓</button></div><div class="hero-art" aria-hidden="true"><div class="tree-ornament"><div class="trunk"></div><div class="limb"></div><div class="limb r"></div><div class="limb up"></div><div class="limb up r"></div><div class="orb o1">祖</div><div class="orb o2">父</div><div class="orb o3">母</div><div class="orb o4">子</div><div class="orb o5">孫</div></div></div></div>
 </header>
 <main class="wrap">
 <section id="authSection" class="panel auth-area hidden"><h2>Đăng nhập thành viên</h2><p>Đăng nhập để xem dữ liệu gia phả riêng của dòng họ. Chỉ quản trị viên mới có quyền thêm, sửa hoặc xóa hồ sơ.</p><div id="authMessage" class="status hidden"></div><form id="authForm" class="auth-form"><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="username" required placeholder="email@example.com"></div><div class="field"><label for="password">Mật khẩu</label><input id="password" type="password" autocomplete="current-password" required placeholder="Mật khẩu"></div><button class="btn gold" id="signInBtn" type="submit">Đăng nhập</button></form><p class="notice">Bạn có thể đăng nhập tại trang riêng hoặc tạo tài khoản mới. Tài khoản đăng ký mới mặc định là thành viên, không có quyền quản trị.</p><div class="actions" style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn light" href="./login.html">Mở trang đăng nhập riêng</a><a class="btn gold" href="./register.html">Tạo tài khoản mới</a></div></section>
 <section class="stats"><div class="stat"><strong id="memberCount">—</strong><span>Thành viên trong gia phả</span></div><div class="stat"><strong id="generationCount">—</strong><span>Thế hệ được ghi nhận</span></div><div class="stat"><strong id="livingCount">—</strong><span>Thành viên còn sống</span></div></section>
-<section class="section" id="familyTree"><div class="section-head"><div><h2>Cây gia phả dòng họ</h2><p>Chọn hồ sơ để xem thông tin từng thế hệ.</p></div><div class="actions"><button class="btn light admin-only hidden" id="addMemberBtn">＋ Thêm thành viên</button><button class="btn light admin-only hidden" id="exportBtn">⇩ Xuất JSON</button></div></div>
-<div class="panel"><div class="toolbar"><div class="search"><input id="treeSearch" type="search" placeholder="Tìm theo họ tên..."></div><select id="generationFilter" class="btn light"><option value="all">Tất cả thế hệ</option></select></div><div id="appStatus" class="status hidden"></div><div id="tree" class="tree-scroll"><div class="empty">Đang kết nối dữ liệu gia phả…</div></div><p class="notice">Thông tin gia phả có thể chứa dữ liệu cá nhân. Chỉ chia sẻ cho người thân được phép truy cập.</p></div></section>
+<section class="section" id="familyTree"><div class="section-head"><div><h2>Cây gia phả dòng họ</h2><p>Thêm ảnh chân dung, cập nhật họ tên và sắp xếp các thành viên theo từng thế hệ. Đăng nhập bằng tài khoản quản trị để chỉnh sửa cây.</p></div><div class="actions"><button class="btn light admin-only hidden" id="addMemberBtn">＋ Thêm thành viên</button><button class="btn light admin-only hidden" id="exportBtn">⇩ Xuất JSON</button></div></div>
+<div class="panel"><div class="toolbar"><div class="search"><input id="treeSearch" type="search" placeholder="Tìm theo họ tên..."></div><select id="generationFilter" class="btn light"><option value="all">Tất cả thế hệ</option></select></div><div id="appStatus" class="status hidden"></div><div id="tree" class="tree-scroll"><div class="empty">Đang kết nối dữ liệu gia phả…</div></div><p class="notice">Quản trị viên có thể bấm “Thêm thành viên” hoặc “Sửa” trên từng ô để cập nhật tên, ảnh, thế hệ và thông tin gia đình. Dữ liệu được lưu trên Supabase.</p></div></section>
 <section class="section" id="members"><div class="section-head"><div><h2>Hồ sơ thành viên</h2><p>Tra cứu thông tin và ảnh chân dung tổ tiên.</p></div></div><div class="toolbar"><div class="search"><input id="memberSearch" type="search" placeholder="Nhập tên cần tìm..."></div></div><div id="peopleGrid" class="people-grid"><div class="empty">Đang tải hồ sơ…</div></div></section>
 <section class="section" id="heritage"><div class="section-head"><div><h2>Ký ức & truyền thống</h2><p>Những giá trị được truyền lại qua nhiều thế hệ.</p></div></div><div class="history"><article><h3>Lời dạy của tổ tiên</h3><p>“Chim có tổ, người có tông.” Hiếu kính ông bà, yêu thương con cháu, sống tử tế và gìn giữ nề nếp gia đình.</p></article><article><h3>Ngày giỗ tổ & họp mặt</h3><p>Ghi nhớ ngày giỗ, ngày kỵ, lịch họp mặt và những sự kiện quan trọng để con cháu luôn hướng về cội nguồn.</p></article></div></section>
 </main><footer class="footer"><strong>Gia Phả Tổ Tiên</strong><p>Gìn giữ ký ức hôm nay · Trao truyền cội nguồn mai sau</p></footer>
